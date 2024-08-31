@@ -6,20 +6,23 @@ use tokio_tungstenite::{
 };
 
 use serenity_voice_model::Event;
-use twilight_model::{gateway::payload::incoming::VoiceServerUpdate, voice::VoiceState};
+use twilight_model::{
+    gateway::payload::incoming::{VoiceServerUpdate, VoiceStateUpdate},
+    voice::VoiceState,
+};
 
-use crate::Result;
+use crate::{client::PartialVoiceStateUpdate, Result};
 
 pub struct DiscordVoiceClient {
     pub websocket: WebSocketStream<MaybeTlsStream<TcpStream>>,
 }
 
 impl DiscordVoiceClient {
-    pub async fn connect(voice_server: VoiceServerUpdate, voice_state: VoiceState) -> Result<Self> {
-        let uri = format!(
-            "wss://{}/?v=4",
-            voice_server.endpoint.unwrap(),
-        );
+    pub async fn connect(
+        voice_server: VoiceServerUpdate,
+        _voice_state: PartialVoiceStateUpdate,
+    ) -> Result<Self> {
+        let uri = format!("wss://{}/?v=4", voice_server.endpoint.unwrap(),);
 
         let (websocket, _) = tokio_tungstenite::connect_async_tls_with_config(
             uri,
