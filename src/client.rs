@@ -1,10 +1,7 @@
-use std::marker::PhantomData;
 
-use tokio::sync::oneshot::{channel, error::RecvError, Receiver, Sender};
 use twilight_model::{
     gateway::{
-        event::Event,
-        payload::incoming::{VoiceServerUpdate, VoiceStateUpdate},
+        payload::incoming::{VoiceServerUpdate},
     },
     id::{
         marker::{ChannelMarker, GuildMarker},

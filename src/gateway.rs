@@ -7,8 +7,7 @@ use tokio_tungstenite::{
 
 use serenity_voice_model::Event;
 use twilight_model::{
-    gateway::payload::incoming::{VoiceServerUpdate, VoiceStateUpdate},
-    voice::VoiceState,
+    gateway::payload::incoming::{VoiceServerUpdate},
 };
 
 use crate::{client::PartialVoiceStateUpdate, Result};
