@@ -10,32 +10,15 @@ use twilight_model::{gateway::payload::incoming::VoiceServerUpdate, voice::Voice
 
 use crate::Result;
 
-pub struct DiscordVoiceClientBuilder {
-    pub voice_server_update: VoiceServerUpdate,
-    pub voice_state: VoiceState,
-}
-
-impl DiscordVoiceClientBuilder {
-    pub fn voice_server_update(mut self, voice_server_update: VoiceServerUpdate) -> Self {
-        self.voice_server_update = voice_server_update;
-        self
-    }
-
-    pub fn voice_state(mut self, voice_state: VoiceState) -> Self {
-        self.voice_state = voice_state;
-        self
-    }
-}
-
 pub struct DiscordVoiceClient {
     pub websocket: WebSocketStream<MaybeTlsStream<TcpStream>>,
 }
 
 impl DiscordVoiceClient {
-    pub async fn connect(builder: DiscordVoiceClientBuilder) -> Result<Self> {
+    pub async fn connect(voice_server: VoiceServerUpdate, voice_state: VoiceState) -> Result<Self> {
         let uri = format!(
             "wss://{}/?v=4",
-            builder.voice_server_update.endpoint.unwrap(),
+            voice_server.endpoint.unwrap(),
         );
 
         let (websocket, _) = tokio_tungstenite::connect_async_tls_with_config(
