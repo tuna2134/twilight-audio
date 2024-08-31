@@ -1,14 +1,12 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+pub mod gateway;
+pub mod types;
+
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error("WebSocket error: {0}")]
+    WebSocket(#[from] tokio_tungstenite::tungstenite::Error),
+    #[error("Serde_json error: {0}")]
+    SerdeJson(#[from] serde_json::Error),
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub type Result<T> = std::result::Result<T, Error>;
