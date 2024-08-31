@@ -1,6 +1,7 @@
-pub mod gateway;
 pub mod client;
+pub mod gateway;
 pub mod types;
+pub mod voice;
 
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -12,6 +13,8 @@ pub enum Error {
     NotReady,
     #[error("VoiceClient is already connected or connecting to voice server.")]
     AlreadyJoined,
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

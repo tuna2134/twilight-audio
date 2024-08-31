@@ -22,7 +22,7 @@ impl DiscordVoiceClient {
         voice_server: VoiceServerUpdate,
         _voice_state: PartialVoiceStateUpdate,
     ) -> Result<Self> {
-        let uri = format!("wss://{}/?v=4", voice_server.endpoint.unwrap(),);
+        let uri = format!("wss://{}/?v=8", voice_server.endpoint.unwrap(),);
 
         let (websocket, _) = tokio_tungstenite::connect_async_tls_with_config(
             uri,
