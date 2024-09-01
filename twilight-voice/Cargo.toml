@@ -17,8 +17,9 @@ tokio-tungstenite = { version = "0.23.1" }
 twilight-model = "0.15.4"
 
 [features]
-default = [ "rustls" ]
-rustls = [ "tokio-tungstenite/rustls-tls-webpki-roots" ]
+default = [ "native-tls" ]
+rustls = [ "tokio-tungstenite/rustls-tls-native-roots" ]
+native-tls = [ "tokio-tungstenite/native-tls" ]
 
 [dev-dependencies]
 anyhow = "1.0.86"
