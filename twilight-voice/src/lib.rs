@@ -95,7 +95,8 @@ mod tests {
                     vc.on_voice_state_update(PartialVoiceStateUpdate {
                         session_id: content.session_id.clone(),
                         channel_id: content.channel_id,
-                    }).await?;
+                    })
+                    .await?;
                     println!("test2");
                 }
                 _ => {}
