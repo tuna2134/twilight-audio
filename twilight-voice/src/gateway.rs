@@ -5,10 +5,9 @@ use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream,
 };
 
-use serenity_voice_model::Event;
+use twilight_voice_model::Event;
 use twilight_model::{
-    gateway::payload::incoming::{VoiceServerUpdate, VoiceStateUpdate},
-    voice::VoiceState,
+    gateway::payload::incoming::{VoiceServerUpdate},
 };
 
 use crate::{client::PartialVoiceStateUpdate, Result};
@@ -22,7 +21,7 @@ impl DiscordVoiceClient {
         voice_server: VoiceServerUpdate,
         _voice_state: PartialVoiceStateUpdate,
     ) -> Result<Self> {
-        let uri = format!("wss://{}/?v=4", voice_server.endpoint.unwrap(),);
+        let uri = format!("wss://{}/?v=8", voice_server.endpoint.unwrap(),);
 
         let (websocket, _) = tokio_tungstenite::connect_async_tls_with_config(
             uri,
@@ -59,6 +58,10 @@ impl DiscordVoiceClient {
             }
         }
 
+        Ok(())
+    }
+
+    pub async fn send_heartbeat(&mut self, message: Message) -> Result<()> {
         Ok(())
     }
 }
