@@ -44,7 +44,7 @@ impl DiscordVoiceClient {
             websocket,
             seq: -1,
             heartbeat_interval: None,
-            voice_server: voice_server,
+            voice_server,
             voice_state,
         };
 
