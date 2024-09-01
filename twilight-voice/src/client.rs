@@ -1,7 +1,7 @@
 use twilight_model::{
     gateway::payload::incoming::VoiceServerUpdate,
     id::{
-        marker::{ChannelMarker, GuildMarker},
+        marker::{ChannelMarker, GuildMarker, UserMarker},
         Id,
     },
 };
@@ -23,6 +23,7 @@ pub trait VoiceUpdate {
 pub struct PartialVoiceStateUpdate {
     pub session_id: String,
     pub channel_id: Option<Id<ChannelMarker>>,
+    pub user_id: Id<UserMarker>,
 }
 
 enum Connection {
