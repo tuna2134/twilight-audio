@@ -21,7 +21,7 @@ impl DiscordVoiceClient {
         voice_server: VoiceServerUpdate,
         _voice_state: PartialVoiceStateUpdate,
     ) -> Result<Self> {
-        let uri = format!("wss://{}/?v=8", voice_server.endpoint.unwrap(),);
+        let uri = format!("wss://{}/?v=7", voice_server.endpoint.unwrap(),);
 
         let (websocket, _) = tokio_tungstenite::connect_async_tls_with_config(
             uri,
@@ -53,11 +53,16 @@ impl DiscordVoiceClient {
             match event {
                 Event::Hello(data) => {
                     println!("Heartbeat interval: {}", data.heartbeat_interval);
+
                 }
                 _ => {}
             }
         }
 
+        Ok(())
+    }
+
+    pub async fn send_heartbeat(&mut self, message: Message) -> Result<()> {
         Ok(())
     }
 }
