@@ -15,6 +15,8 @@ pub enum Error {
     AlreadyJoined,
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
+    #[error("SystemTime error: {0}")]
+    SystemTime(#[from] std::time::SystemTimeError),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -95,6 +97,7 @@ mod tests {
                     vc.on_voice_state_update(PartialVoiceStateUpdate {
                         session_id: content.session_id.clone(),
                         channel_id: content.channel_id,
+                        user_id: content.user_id,
                     })
                     .await?;
                     println!("test2");
