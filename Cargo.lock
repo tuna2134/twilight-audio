@@ -1291,19 +1291,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serenity-voice-model"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "593682f6155d07c8b331b3d1060f5aab7e6796caca9f2f66bd9e6855c880e06b"
-dependencies = [
- "bitflags 2.6.0",
- "num-traits",
- "serde",
- "serde_json",
- "serde_repr",
-]
-
-[[package]]
 name = "sha1"
 version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1733,12 +1720,12 @@ dependencies = [
  "futures-util",
  "serde",
  "serde_json",
- "serenity-voice-model",
  "thiserror",
  "tokio",
  "tokio-tungstenite 0.23.1",
  "twilight-gateway",
  "twilight-model",
+ "twilight-voice-model",
 ]
 
 [[package]]
