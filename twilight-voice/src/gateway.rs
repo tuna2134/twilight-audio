@@ -1,5 +1,5 @@
 use futures_util::{SinkExt, StreamExt};
-use tokio::net::TcpStream;
+use tokio::{net::TcpStream, time::Duration};
 use tokio_tungstenite::{
     tungstenite::{protocol::WebSocketConfig, Message},
     MaybeTlsStream, WebSocketStream,
@@ -49,11 +49,27 @@ impl DiscordVoiceClient {
         };
 
         client.poll().await?;
-        client.poll().await?;
-        client.poll().await?;
-        client.poll().await?;
 
         Ok(client)
+    }
+
+    pub async fn run(&mut self) -> Result<()> {
+        loop {
+            tokio::select! {
+                _ = tokio::time::sleep(
+                    Duration::from_millis(
+                        self.heartbeat_interval.unwrap_or(1000.0) as u64
+                    )
+                ) => {
+                    self.send_heartbeat().await?;
+                }
+                result = self.poll() => {
+                    if let Err(e) = result {
+                        return Err(e);
+                    }
+                }
+            }
+        }
     }
 
     pub async fn poll(&mut self) -> Result<()> {
@@ -73,7 +89,6 @@ impl DiscordVoiceClient {
                     self.send_identify().await?;
                 }
                 Event::Ready(data) => {
-                    self.send_heartbeat().await?;
                 }
                 _ => {}
             }
