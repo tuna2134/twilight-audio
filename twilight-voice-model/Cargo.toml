@@ -1,7 +1,11 @@
 [package]
-authors = ["Alex M. M. <acdenissk69@gmail.com>", "tuna2134 <hello@tuna2134.dev>"]
+authors = [
+    "Alex M. M. <acdenissk69@gmail.com>",
+    "tuna2134 <hello@tuna2134.dev>",
+    "Takagi Tasuku <tasuren@outlook.jp>"
+]
 description = "A Rust library for (de)serializing Discord Voice API gateway messages."
-documentation = "https://docs.rs/serenity"
+# TODO: documentation = "https://docs.rs/"
 homepage = "https://github.com/tuna2134/twilight-audio"
 include = ["src/**/*.rs", "Cargo.toml"]
 keywords = ["discord", "api"]
@@ -9,13 +13,14 @@ license = "ISC"
 name = "twilight-voice-model"
 # readme = "README.md"
 repository = "https://github.com/tuna2134/twilight-audio"
-version = "0.2.0"
+version = "0.1.0"
 edition = "2018"
 
 [dependencies]
 bitflags = "2.4"
 num-traits = "0.2"
 serde_repr = "0.1.5"
+twilight-model.workspace = true
 
 [dependencies.serde]
 version = "1"
@@ -28,6 +33,7 @@ version = "1"
 [dev-dependencies]
 criterion = "0.5"
 serde_test = "1"
+static_assertions = "1.1.0"
 
 [[bench]]
 name = "deserialisation"

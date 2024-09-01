@@ -10,11 +10,11 @@ discortp = { version = "0.6.0", features = ["discord-full"] }
 futures-util = "0.3.30"
 serde = { version = "1.0.209", features = ["derive"] }
 serde_json = { version = "1.0.127", features = ["raw_value"] }
-twilight-voice-model = { version = "0.2.0", path = "../twilight-voice-model" }
+twilight-voice-model.path = "../twilight-voice-model"
 thiserror = "1.0.63"
 tokio = { version = "1.40.0", features = ["full"] }
-tokio-tungstenite = { version = "0.23.1" }
-twilight-model = "0.15.4"
+tokio-tungstenite = "0.23.1"
+twilight-model.workspace = true
 
 [features]
 default = [ "native-tls" ]

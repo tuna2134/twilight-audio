@@ -1,10 +1,10 @@
 use std::net::Ipv4Addr;
 
 use serde_test::{Configure, Token};
+use twilight_model::id::Id;
+use twilight_model::voice::OpCode;
 
 use super::Event;
-use crate::id::*;
-use crate::opcode::Opcode;
 use crate::payload::*;
 use crate::protocol_data::ProtocolData;
 use crate::speaking_state::SpeakingState;
@@ -26,8 +26,8 @@ fn deserialize_identify_json() {
     let ident = Identify {
         session_id: "my_session_id".into(),
         token: "my_token".into(),
-        server_id: GuildId(41771983423143937),
-        user_id: UserId(104694319306248192),
+        server_id: Id::new(41771983423143937),
+        user_id: Id::new(104694319306248192),
     };
 
     assert!(matches!(event, Ok(Event::Identify(i)) if i == ident));
@@ -95,14 +95,18 @@ fn deserialize_ready_json() {
 #[test]
 fn deserialize_heartbeat_json() {
     let json_data = r#"{
-      "op": 3,
-      "d": 1501184119561
+        "op": 3,
+        "d": {
+            "t": 1501184119561,
+            "seq_ack": 10
+        }
     }"#;
 
     let event = serde_json::from_str(json_data);
 
     let hb = Heartbeat {
-        nonce: 1501184119561,
+        t: 1501184119561,
+        seq_ack: 10,
     };
 
     assert!(matches!(event, Ok(Event::Heartbeat(i)) if i == hb));
@@ -152,15 +156,15 @@ fn deserialize_speaking_json() {
 #[test]
 fn deserialize_heartbeat_ack_json() {
     let json_data = r#"{
-      "op": 6,
-      "d": 1501184119561
+        "op": 6,
+        "d": {
+            "t": 1501184119561
+        }
     }"#;
 
     let event = serde_json::from_str(json_data);
 
-    let hb = HeartbeatAck {
-        nonce: 1501184119561,
-    };
+    let hb = HeartbeatAck { t: 1501184119561 };
 
     assert!(matches!(event, Ok(Event::HeartbeatAck(i)) if i == hb));
 }
@@ -179,7 +183,7 @@ fn deserialize_resume_json() {
     let event = serde_json::from_str(json_data);
 
     let resume = Resume {
-        server_id: GuildId(41771983423143937),
+        server_id: Id::new(41771983423143937),
         session_id: "my_session_id".into(),
         token: "my_token".into(),
     };
@@ -222,28 +226,6 @@ fn deserialize_resumed_json() {
 }
 
 #[test]
-fn deserialize_client_connect_json() {
-    let json_data = r#"{
-      "op": 12,
-      "d": {
-        "audio_ssrc": 5678,
-        "user_id": "1234",
-        "video_ssrc": 9012
-      }
-    }"#;
-
-    let event = serde_json::from_str(json_data);
-
-    let conn = ClientConnect {
-        audio_ssrc: 5678,
-        user_id: UserId(1234),
-        video_ssrc: 9012,
-    };
-
-    assert!(matches!(event, Ok(Event::ClientConnect(i)) if i == conn));
-}
-
-#[test]
 fn deserialize_client_disconnect_json() {
     let json_data = r#"{
       "op": 13,
@@ -255,7 +237,7 @@ fn deserialize_client_disconnect_json() {
     let event = serde_json::from_str(json_data);
 
     let conn = ClientDisconnect {
-        user_id: UserId(1234),
+        user_id: Id::new(1234),
     };
 
     assert!(matches!(event, Ok(Event::ClientDisconnect(i)) if i == conn));
@@ -264,10 +246,10 @@ fn deserialize_client_disconnect_json() {
 #[test]
 fn serialize_identify() {
     let value: Event = Identify {
-        server_id: GuildId(1),
+        server_id: Id::new(1),
         session_id: "56f88a86dce65c65b9".into(),
         token: "56f88a86dce65c65b8".into(),
-        user_id: UserId(2),
+        user_id: Id::new(2),
     }
     .into();
 
@@ -279,21 +261,21 @@ fn serialize_identify() {
                 len: 2,
             },
             Token::Str("op"),
-            Token::U8(Opcode::Identify as u8),
+            Token::U8(OpCode::Identify as u8),
             Token::Str("d"),
             Token::Struct {
                 name: "Identify",
                 len: 4,
             },
             Token::Str("server_id"),
-            Token::NewtypeStruct { name: "GuildId" },
+            Token::NewtypeStruct { name: "Id" },
             Token::Str("1"),
             Token::Str("session_id"),
             Token::Str("56f88a86dce65c65b9"),
             Token::Str("token"),
             Token::Str("56f88a86dce65c65b8"),
             Token::Str("user_id"),
-            Token::NewtypeStruct { name: "UserId" },
+            Token::NewtypeStruct { name: "Id" },
             Token::Str("2"),
             Token::StructEnd,
             Token::StructEnd,
@@ -321,7 +303,7 @@ fn serialize_select_protocol() {
                 len: 2,
             },
             Token::Str("op"),
-            Token::U8(Opcode::SelectProtocol as u8),
+            Token::U8(OpCode::SelectProtocol as u8),
             Token::Str("d"),
             Token::Struct {
                 name: "SelectProtocol",
@@ -369,7 +351,7 @@ fn serialize_ready() {
                 len: 2,
             },
             Token::Str("op"),
-            Token::U8(Opcode::Ready as u8),
+            Token::U8(OpCode::Ready as u8),
             Token::Str("d"),
             Token::Struct {
                 name: "Ready",
@@ -395,7 +377,11 @@ fn serialize_ready() {
 
 #[test]
 fn serialize_heartbeat() {
-    let value: Event = Heartbeat { nonce: 1234567890 }.into();
+    let value: Event = Heartbeat {
+        t: 1501184119561,
+        seq_ack: 10,
+    }
+    .into();
 
     serde_test::assert_ser_tokens(
         &value,
@@ -405,9 +391,17 @@ fn serialize_heartbeat() {
                 len: 2,
             },
             Token::Str("op"),
-            Token::U8(Opcode::Heartbeat as u8),
+            Token::U8(OpCode::Heartbeat as u8),
             Token::Str("d"),
-            Token::Str("1234567890"),
+            Token::Struct {
+                name: "Heartbeat",
+                len: 2,
+            },
+            Token::Str("t"),
+            Token::U64(1501184119561),
+            Token::Str("seq_ack"),
+            Token::I64(10),
+            Token::StructEnd,
             Token::StructEnd,
         ],
     );
@@ -429,7 +423,7 @@ fn serialize_session_description() {
                 len: 2,
             },
             Token::Str("op"),
-            Token::U8(Opcode::SessionDescription as u8),
+            Token::U8(OpCode::SessionDescription as u8),
             Token::Str("d"),
             Token::Struct {
                 name: "SessionDescription",
@@ -469,7 +463,7 @@ fn serialize_speaking() {
                 len: 2,
             },
             Token::Str("op"),
-            Token::U8(Opcode::Speaking as u8),
+            Token::U8(OpCode::Speaking as u8),
             Token::Str("d"),
             Token::Struct {
                 name: "Speaking",
@@ -492,7 +486,7 @@ fn serialize_speaking() {
 
 #[test]
 fn serialize_heartbeat_ack() {
-    let value: Event = HeartbeatAck { nonce: 1234567890 }.into();
+    let value: Event = HeartbeatAck { t: 1501184119561 }.into();
 
     serde_test::assert_ser_tokens(
         &value,
@@ -502,9 +496,15 @@ fn serialize_heartbeat_ack() {
                 len: 2,
             },
             Token::Str("op"),
-            Token::U8(Opcode::HeartbeatAck as u8),
+            Token::U8(OpCode::HeartbeatAck as u8),
             Token::Str("d"),
-            Token::Str("1234567890"),
+            Token::Struct {
+                name: "HeartbeatAck",
+                len: 1,
+            },
+            Token::Str("t"),
+            Token::U64(1501184119561),
+            Token::StructEnd,
             Token::StructEnd,
         ],
     );
@@ -513,7 +513,7 @@ fn serialize_heartbeat_ack() {
 #[test]
 fn serialize_resume() {
     let value: Event = Resume {
-        server_id: GuildId(1),
+        server_id: Id::new(1),
         session_id: "sess_sess_sess_sess".into(),
         token: "my_token".into(),
     }
@@ -527,14 +527,14 @@ fn serialize_resume() {
                 len: 2,
             },
             Token::Str("op"),
-            Token::U8(Opcode::Resume as u8),
+            Token::U8(OpCode::Resume as u8),
             Token::Str("d"),
             Token::Struct {
                 name: "Resume",
                 len: 3,
             },
             Token::Str("server_id"),
-            Token::NewtypeStruct { name: "GuildId" },
+            Token::NewtypeStruct { name: "Id" },
             Token::Str("1"),
             Token::Str("session_id"),
             Token::Str("sess_sess_sess_sess"),
@@ -561,7 +561,7 @@ fn serialize_hello() {
                 len: 2,
             },
             Token::Str("op"),
-            Token::U8(Opcode::Hello as u8),
+            Token::U8(OpCode::Hello as u8),
             Token::Str("d"),
             Token::Struct {
                 name: "Hello",
@@ -587,7 +587,7 @@ fn serialize_resumed() {
                 len: 2,
             },
             Token::Str("op"),
-            Token::U8(Opcode::Resumed as u8),
+            Token::U8(OpCode::Resumed as u8),
             Token::Str("d"),
             Token::None,
             Token::StructEnd,
@@ -596,45 +596,9 @@ fn serialize_resumed() {
 }
 
 #[test]
-fn serialize_client_connect() {
-    let value: Event = ClientConnect {
-        audio_ssrc: 12345,
-        user_id: UserId(56),
-        video_ssrc: 67890,
-    }
-    .into();
-
-    serde_test::assert_ser_tokens(
-        &value,
-        &[
-            Token::Struct {
-                name: "Event",
-                len: 2,
-            },
-            Token::Str("op"),
-            Token::U8(Opcode::ClientConnect as u8),
-            Token::Str("d"),
-            Token::Struct {
-                name: "ClientConnect",
-                len: 3,
-            },
-            Token::Str("audio_ssrc"),
-            Token::U32(12345),
-            Token::Str("user_id"),
-            Token::NewtypeStruct { name: "UserId" },
-            Token::Str("56"),
-            Token::Str("video_ssrc"),
-            Token::U32(67890),
-            Token::StructEnd,
-            Token::StructEnd,
-        ],
-    );
-}
-
-#[test]
 fn serialize_client_disconnect() {
     let value: Event = ClientDisconnect {
-        user_id: UserId(56),
+        user_id: Id::new(56),
     }
     .into();
 
@@ -646,14 +610,14 @@ fn serialize_client_disconnect() {
                 len: 2,
             },
             Token::Str("op"),
-            Token::U8(Opcode::ClientDisconnect as u8),
+            Token::U8(OpCode::ClientDisconnect as u8),
             Token::Str("d"),
             Token::Struct {
                 name: "ClientDisconnect",
                 len: 1,
             },
             Token::Str("user_id"),
-            Token::NewtypeStruct { name: "UserId" },
+            Token::NewtypeStruct { name: "Id" },
             Token::Str("56"),
             Token::StructEnd,
             Token::StructEnd,

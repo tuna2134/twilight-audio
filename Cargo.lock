@@ -1494,6 +1494,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6980e8d7511241f8acf4aebddbb1ff938df5eebe98691418c4468d0b72a96a67"
 
 [[package]]
+name = "static_assertions"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
+
+[[package]]
 name = "subtle"
 version = "2.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1897,7 +1903,7 @@ dependencies = [
 
 [[package]]
 name = "twilight-voice-model"
-version = "0.2.0"
+version = "0.1.0"
 dependencies = [
  "bitflags 2.6.0",
  "criterion",
@@ -1906,6 +1912,8 @@ dependencies = [
  "serde_json",
  "serde_repr",
  "serde_test",
+ "static_assertions",
+ "twilight-model",
 ]
 
 [[package]]

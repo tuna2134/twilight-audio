@@ -55,12 +55,6 @@ impl From<Hello> for Event {
     }
 }
 
-impl From<ClientConnect> for Event {
-    fn from(i: ClientConnect) -> Self {
-        Event::ClientConnect(i)
-    }
-}
-
 impl From<ClientDisconnect> for Event {
     fn from(i: ClientDisconnect) -> Self {
         Event::ClientDisconnect(i)

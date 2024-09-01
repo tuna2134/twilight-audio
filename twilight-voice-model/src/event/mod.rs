@@ -8,8 +8,7 @@ use serde::ser::{SerializeStruct, Serializer};
 use serde::{Deserialize, Serialize};
 use serde_json::value::RawValue;
 
-use crate::opcode::Opcode;
-use crate::payload::*;
+use crate::{payload::*, OpCode};
 
 /// A representation of data received for voice gateway events.
 #[derive(Clone, Debug)]
@@ -36,28 +35,25 @@ pub enum Event {
     Hello(Hello),
     /// Message received if a Resume request was successful.
     Resumed,
-    /// Status update in the current channel, indicating that a user has connected.
-    ClientConnect(ClientConnect),
     /// Status update in the current channel, indicating that a user has disconnected.
     ClientDisconnect(ClientDisconnect),
 }
 
 impl Event {
-    pub fn kind(&self) -> Opcode {
+    pub fn kind(&self) -> OpCode {
         use Event::*;
         match self {
-            Identify(_) => Opcode::Identify,
-            SelectProtocol(_) => Opcode::SelectProtocol,
-            Ready(_) => Opcode::Ready,
-            Heartbeat(_) => Opcode::Heartbeat,
-            SessionDescription(_) => Opcode::SessionDescription,
-            Speaking(_) => Opcode::Speaking,
-            HeartbeatAck(_) => Opcode::HeartbeatAck,
-            Resume(_) => Opcode::Resume,
-            Hello(_) => Opcode::Hello,
-            Resumed => Opcode::Resumed,
-            ClientConnect(_) => Opcode::ClientConnect,
-            ClientDisconnect(_) => Opcode::ClientDisconnect,
+            Identify(_) => OpCode::Identify,
+            SelectProtocol(_) => OpCode::SelectProtocol,
+            Ready(_) => OpCode::Ready,
+            Heartbeat(_) => OpCode::Heartbeat,
+            SessionDescription(_) => OpCode::SessionDescription,
+            Speaking(_) => OpCode::Speaking,
+            HeartbeatAck(_) => OpCode::HeartbeatAck,
+            Resume(_) => OpCode::Resume,
+            Hello(_) => OpCode::Hello,
+            Resumed => OpCode::Resumed,
+            ClientDisconnect(_) => OpCode::ClientDisconnect,
         }
     }
 }
@@ -83,7 +79,6 @@ impl Serialize for Event {
             Resume(e) => s.serialize_field("d", e)?,
             Hello(e) => s.serialize_field("d", e)?,
             Resumed => s.serialize_field("d", &None::<()>)?,
-            ClientConnect(e) => s.serialize_field("d", e)?,
             ClientDisconnect(e) => s.serialize_field("d", e)?,
         }
 
@@ -112,7 +107,7 @@ impl<'de> Visitor<'de> for EventVisitor {
                 Some("op") => {
                     let raw = map.next_value::<u8>()?;
                     let des: U8Deserializer<A::Error> = raw.into_deserializer();
-                    let valid_op = Opcode::deserialize(des).map_err(|_| {
+                    let valid_op = OpCode::deserialize(des).map_err(|_| {
                         DeError::invalid_value(
                             Unexpected::Unsigned(raw.into()),
                             &"opcode in [0--9] + [12--13]",
@@ -123,32 +118,29 @@ impl<'de> Visitor<'de> for EventVisitor {
                 // Idea: Op comes first, but missing it is not failure.
                 // So, if order correct then we don't need to pass the RawValue back out.
                 Some("d") => match op {
-                    Some(Opcode::Identify) => return Ok(map.next_value::<Identify>()?.into()),
-                    Some(Opcode::SelectProtocol) => {
+                    Some(OpCode::Identify) => return Ok(map.next_value::<Identify>()?.into()),
+                    Some(OpCode::SelectProtocol) => {
                         return Ok(map.next_value::<SelectProtocol>()?.into())
                     }
-                    Some(Opcode::Ready) => return Ok(map.next_value::<Ready>()?.into()),
-                    Some(Opcode::Heartbeat) => return Ok(map.next_value::<Heartbeat>()?.into()),
-                    Some(Opcode::HeartbeatAck) => {
+                    Some(OpCode::Ready) => return Ok(map.next_value::<Ready>()?.into()),
+                    Some(OpCode::Heartbeat) => return Ok(map.next_value::<Heartbeat>()?.into()),
+                    Some(OpCode::HeartbeatAck) => {
                         return Ok(map.next_value::<HeartbeatAck>()?.into())
                     }
-                    Some(Opcode::SessionDescription) => {
+                    Some(OpCode::SessionDescription) => {
                         return Ok(map.next_value::<SessionDescription>()?.into())
                     }
-                    Some(Opcode::Speaking) => return Ok(map.next_value::<Speaking>()?.into()),
-                    Some(Opcode::Resume) => return Ok(map.next_value::<Resume>()?.into()),
-                    Some(Opcode::Hello) => return Ok(map.next_value::<Hello>()?.into()),
-                    Some(Opcode::Resumed) => {
+                    Some(OpCode::Speaking) => return Ok(map.next_value::<Speaking>()?.into()),
+                    Some(OpCode::Resume) => return Ok(map.next_value::<Resume>()?.into()),
+                    Some(OpCode::Hello) => return Ok(map.next_value::<Hello>()?.into()),
+                    Some(OpCode::Resumed) => {
                         let _ = map.next_value::<Option<()>>()?;
                         return Ok(Event::Resumed);
                     }
-                    Some(Opcode::ClientConnect) => {
-                        return Ok(map.next_value::<ClientConnect>()?.into())
-                    }
-                    Some(Opcode::ClientDisconnect) => {
+                    Some(OpCode::ClientDisconnect) => {
                         return Ok(map.next_value::<ClientDisconnect>()?.into())
                     }
-                    None => {
+                    None | Some(_) => {
                         d = Some(map.next_value::<&RawValue>()?);
                     }
                 },
@@ -173,20 +165,20 @@ impl<'de> Visitor<'de> for EventVisitor {
         let op = op.expect("Struct variant known to exist if loop has been escaped.");
 
         (match op {
-            Opcode::Identify => serde_json::from_str::<Identify>(d).map(Into::into),
-            Opcode::SelectProtocol => serde_json::from_str::<SelectProtocol>(d).map(Into::into),
-            Opcode::Ready => serde_json::from_str::<Ready>(d).map(Into::into),
-            Opcode::Heartbeat => serde_json::from_str::<Heartbeat>(d).map(Into::into),
-            Opcode::HeartbeatAck => serde_json::from_str::<HeartbeatAck>(d).map(Into::into),
-            Opcode::SessionDescription => {
+            OpCode::Identify => serde_json::from_str::<Identify>(d).map(Into::into),
+            OpCode::SelectProtocol => serde_json::from_str::<SelectProtocol>(d).map(Into::into),
+            OpCode::Ready => serde_json::from_str::<Ready>(d).map(Into::into),
+            OpCode::Heartbeat => serde_json::from_str::<Heartbeat>(d).map(Into::into),
+            OpCode::HeartbeatAck => serde_json::from_str::<HeartbeatAck>(d).map(Into::into),
+            OpCode::SessionDescription => {
                 serde_json::from_str::<SessionDescription>(d).map(Into::into)
             }
-            Opcode::Speaking => serde_json::from_str::<Speaking>(d).map(Into::into),
-            Opcode::Resume => serde_json::from_str::<Resume>(d).map(Into::into),
-            Opcode::Hello => serde_json::from_str::<Hello>(d).map(Into::into),
-            Opcode::Resumed => Ok(Event::Resumed),
-            Opcode::ClientConnect => serde_json::from_str::<ClientConnect>(d).map(Into::into),
-            Opcode::ClientDisconnect => serde_json::from_str::<ClientDisconnect>(d).map(Into::into),
+            OpCode::Speaking => serde_json::from_str::<Speaking>(d).map(Into::into),
+            OpCode::Resume => serde_json::from_str::<Resume>(d).map(Into::into),
+            OpCode::Hello => serde_json::from_str::<Hello>(d).map(Into::into),
+            OpCode::Resumed => Ok(Event::Resumed),
+            OpCode::ClientDisconnect => serde_json::from_str::<ClientDisconnect>(d).map(Into::into),
+            _ => Err(DeError::custom("Invalid opcode")),
         })
         .map_err(DeError::custom)
     }
