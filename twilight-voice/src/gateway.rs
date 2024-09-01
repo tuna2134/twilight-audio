@@ -5,10 +5,8 @@ use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream,
 };
 
+use twilight_model::gateway::payload::incoming::VoiceServerUpdate;
 use twilight_voice_model::Event;
-use twilight_model::{
-    gateway::payload::incoming::{VoiceServerUpdate},
-};
 
 use crate::{client::PartialVoiceStateUpdate, Result};
 

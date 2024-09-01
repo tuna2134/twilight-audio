@@ -1,8 +1,5 @@
-
 use twilight_model::{
-    gateway::{
-        payload::incoming::{VoiceServerUpdate},
-    },
+    gateway::payload::incoming::VoiceServerUpdate,
     id::{
         marker::{ChannelMarker, GuildMarker},
         Id,

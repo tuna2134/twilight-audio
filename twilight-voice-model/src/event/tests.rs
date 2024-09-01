@@ -156,15 +156,15 @@ fn deserialize_speaking_json() {
 #[test]
 fn deserialize_heartbeat_ack_json() {
     let json_data = r#"{
-      "op": 6,
-      "d": 1501184119561
+        "op": 6,
+        "d": {
+            "t": 1501184119561
+        }
     }"#;
 
     let event = serde_json::from_str(json_data);
 
-    let hb = HeartbeatAck {
-        nonce: 1501184119561,
-    };
+    let hb = HeartbeatAck { t: 1501184119561 };
 
     assert!(matches!(event, Ok(Event::HeartbeatAck(i)) if i == hb));
 }
@@ -486,7 +486,7 @@ fn serialize_speaking() {
 
 #[test]
 fn serialize_heartbeat_ack() {
-    let value: Event = HeartbeatAck { nonce: 1234567890 }.into();
+    let value: Event = HeartbeatAck { t: 1501184119561 }.into();
 
     serde_test::assert_ser_tokens(
         &value,
@@ -498,7 +498,13 @@ fn serialize_heartbeat_ack() {
             Token::Str("op"),
             Token::U8(OpCode::HeartbeatAck as u8),
             Token::Str("d"),
-            Token::Str("1234567890"),
+            Token::Struct {
+                name: "HeartbeatAck",
+                len: 1,
+            },
+            Token::Str("t"),
+            Token::U64(1501184119561),
+            Token::StructEnd,
             Token::StructEnd,
         ],
     );
