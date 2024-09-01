@@ -22,4 +22,5 @@ rustls = [ "tokio-tungstenite/rustls-tls-webpki-roots" ]
 
 [dev-dependencies]
 anyhow = "1.0.86"
+dotenvy = "0.15.7"
 twilight-gateway = "0.15.4"

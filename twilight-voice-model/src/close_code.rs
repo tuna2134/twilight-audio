@@ -37,7 +37,10 @@ impl CloseCode {
     ///
     /// Otherwise, the connection should be closed.
     pub fn should_resume(&self) -> bool {
-        matches!(self, CloseCode::VoiceServerCrash | CloseCode::SessionTimeout)
+        matches!(
+            self,
+            CloseCode::VoiceServerCrash | CloseCode::SessionTimeout
+        )
     }
 }
 

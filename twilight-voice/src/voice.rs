@@ -1,5 +1,5 @@
-use tokio::net::UdpSocket;
 use discortp::discord::{IpDiscoveryPacket, IpDiscoveryType, MutableIpDiscoveryPacket};
+use tokio::net::UdpSocket;
 
 use crate::Result;
 
