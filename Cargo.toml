@@ -1,2 +1,6 @@
 [workspace]
 members = ["twilight-voice", "twilight-voice-model"]
+resolver = "2"
+
+[workspace.dependencies]
+twilight-model = "0.15.4"
